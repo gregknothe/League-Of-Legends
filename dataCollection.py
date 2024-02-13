@@ -2,24 +2,22 @@ import requests
 import pandas as pd
 from datetime import date
 import os
-import time
 
 # LoL API Dev Portal: https://developer.riotgames.com/
 # Dev Docs: https://developer.riotgames.com/docs/lol
 
 
 key = "RGAPI-c5641ff5-8199-4fd1-b6d5-59427a1460bf"
-puuid = "wNZrz_iRLQUVnyoil-jSSQ3ZZd7o-bTCyYIDgBqheYtREHcZd0astsVtTKvM5-ORRt5kh9rBdiFR4w"
 
-def getUserInfo(username):
+def getUserInfo(username, tag):
     #Gets the user's info from their username for later use.
-    response = requests.get("https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + username + "?api_key=" + key).json()
-    return response.get("name"), response.get("id"), response.get("accountId"), response.get("puuid"), response.get("profileIconId"), response.get("summonerLevel") 
+    response = requests.get("https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ username + "/" + tag + "?api_key=" + key).json()
+    #response = requests.get("https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + username + "?api_key=" + key).json()
+    return response.get("gameName"), response.get("tagLine"), response.get("puuid")
 
-
-def saveUserInfo(username):
+def saveUserInfo(username, tag):
     #Saves the user's info into the userList file to save on API calls later down the line.
-    info = getUserInfo(username)
+    info = getUserInfo(username, tag)
     userDf = pd.read_csv("userList.csv", index_col=None)
     if info[0] in userDf["name"].to_list():
         #Updates the info if they are already in the list.
@@ -31,9 +29,8 @@ def saveUserInfo(username):
         #Otherwise adds the user and their info to the list.
         userDf.loc[len(userDf)] = info
         userDf = userDf.to_csv("userList.csv", index=False)
-        print("User Added: " + info[0] + " - " + info[2])
+        print("User Added: " + str(info[0]) + " - " + info[2])
     return
-
 
 def getUserGameIds(username, puuid, matchCount):
     #Pulls the game IDs for the given player and stores them into a csv to be called on later individually.
@@ -50,7 +47,6 @@ def getUserGameIds(username, puuid, matchCount):
         print("Existing user matchList updated: " + username)
         return
 
-
 def updateUserGameIds(matchCount):
     #Pulls the game IDs for all users in userList.
     df = pd.read_csv("userList.csv", index_col=None)
@@ -58,9 +54,8 @@ def updateUserGameIds(matchCount):
         getUserGameIds(df['name'][x], df["puuid"][x], matchCount)
     return
 
-
 def getGameInfo(matchId, puuid):
-    response = requests.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + matchId + "/?api_key="+key).json()
+    response = requests.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + matchId + "/?api_key=" + key).json()
     personalInfo = []
     info = []
     
@@ -110,7 +105,6 @@ def getGameInfo(matchId, puuid):
         info.append(response["info"]["participants"][x]["item6"])
 
     return personalInfo + info
-
 
 def updateGameInfo(username, puuid):
     matchList = pd.read_csv("matchList/" + username + "_matchList.csv", index_col=None)["matchId"]  
@@ -201,7 +195,6 @@ def updateGameInfo(username, puuid):
         print("Updated " + username + " match data updated (" + str(len(newMatchList)) + " new matches).")
         return
 
-
 def updateAllGameInfo(gameCount):
     userDf = pd.read_csv("userList.csv", index_col=None)
     updateUserGameIds(gameCount)
@@ -209,18 +202,54 @@ def updateAllGameInfo(gameCount):
         updateGameInfo(userDf["name"][x], userDf["puuid"][x])
     return
 
-
-def championTable(username):
+def championTable(username, gameMode="ARAM"):
+    #Returns a dataframe with all played champions statistics
     df = pd.read_csv("matchData/" + username + "_matchData.csv", index_col=None)
+    df = df[df["gameMode"] == gameMode]
+    df["date"] = pd.to_datetime(df["gameStartTimestamp"], unit='ms')
+    df = df[df["date"] >= "2024-01-10 00:00:00.000"]
     championList = pd.unique(df["userChamp"])
+    gameCountList, winCountList, killCountList, deathCountList, assistCountList, kdaList = [], [], [], [], [], []
     for champ in championList:
-        print(champ)
-    return
+        champDf = df[df["userChamp"] == champ]
+        gameCount = len(champDf["userChamp"])
+        gameCountList.append(gameCount)
+        winCountList.append(round(len(champDf[champDf["userWin"]==True])/gameCount, 2))
+        killCountList.append(round(champDf["userKills"].sum()/gameCount, 2))
+        deathCountList.append(round(champDf["userDeaths"].sum()/gameCount, 2))
+        assistCountList.append(round(champDf["userAssists"].sum()/gameCount, 2))
+        kdaList.append(round((champDf["userAssists"].sum() + champDf["userKills"].sum())/(champDf["userDeaths"].sum()),2))
+    champTable = pd.DataFrame({"champion": championList, "winRate": winCountList, "gameCount": gameCountList, "kda": kdaList, "AvgKills": killCountList,
+                               "AvgDeaths": deathCountList, "AvgAssists": assistCountList}).sort_values(by=["gameCount", "winRate"], ascending=False).reset_index(drop=True)
+    return champTable
+
+def userListTable(gameMode="ARAM"):
+    #Returns a dataframe that has all users' stats in user list.
+    userList = pd.read_csv("userList.csv", index_col=None)
+    userListList = userList["name"].to_list()
+    gameCountList, winRateList, killList, deathList, assistList, kdaList = [], [], [], [], [], []
+    for user in userListList:
+        df = pd.read_csv("matchData/" + user + "_matchData.csv", index_col=None)
+        df = df[df["gameMode"] == gameMode]
+        df["date"] = pd.to_datetime(df["gameStartTimestamp"], unit='ms')
+        df = df[df["date"] >= "2024-01-10 00:00:00.000"]
+        gameCount = len(df["userChamp"])
+        gameCountList.append(gameCount)
+        winRateList.append(round(len(df[df["userWin"]==True])/gameCount, 2))
+        killList.append(round(df["userKills"].sum()/gameCount, 2))
+        deathList.append(round(df["userDeaths"].sum()/gameCount, 2))
+        assistList.append(round(df["userAssists"].sum()/gameCount, 2))
+        kdaList.append(round((df["userAssists"].sum() + df["userKills"].sum())/(df["userDeaths"].sum()),2))
+    userTable = pd.DataFrame({"name": userListList, "winRate": winRateList, "gameCount": gameCountList, "kda": kdaList, "AvgKills": killList, 
+                              "AvgDeaths": deathList, "AvgAssists": assistList}).reset_index(drop=True)
+    return userTable
 
 #Add user to user list
-#saveUserInfo("actuallyapotato")
+#saveUserInfo("Jackpot", "monte")
 
 #Update all match data for users in user list
-#updateAllGameInfo(20)
+updateAllGameInfo(100)
 
-championTable("Shuckle")
+#Final Tables
+#print(championTable("Jackpot"))
+#print(userListTable())
