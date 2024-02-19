@@ -12,7 +12,6 @@ key = "RGAPI-c5641ff5-8199-4fd1-b6d5-59427a1460bf"
 def getUserInfo(username, tag):
     #Gets the user's info from their username for later use.
     response = requests.get("https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"+ username + "/" + tag + "?api_key=" + key).json()
-    #response = requests.get("https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + username + "?api_key=" + key).json()
     return response.get("gameName"), response.get("tagLine"), response.get("puuid")
 
 def saveUserInfo(username, tag):
@@ -234,6 +233,11 @@ def userListTable(gameMode="ARAM"):
         df["date"] = pd.to_datetime(df["gameStartTimestamp"], unit='ms')
         df = df[df["date"] >= "2024-01-10 00:00:00.000"]
         gameCount = len(df["userChamp"])
+        if gameCount == 0:
+            #Skips user if they are zero games within this season. 
+            userListList.remove(user)
+            print(userListList)
+            break
         gameCountList.append(gameCount)
         winRateList.append(round(len(df[df["userWin"]==True])/gameCount, 2))
         killList.append(round(df["userKills"].sum()/gameCount, 2))
@@ -245,11 +249,11 @@ def userListTable(gameMode="ARAM"):
     return userTable
 
 #Add user to user list
-#saveUserInfo("Jackpot", "monte")
+#saveUserInfo("KlahrStar", "NA1")
 
 #Update all match data for users in user list
-updateAllGameInfo(100)
+#updateAllGameInfo(20)
 
 #Final Tables
-#print(championTable("Jackpot"))
-#print(userListTable())
+#print(championTable("KlahrStar"))
+print(userListTable())
