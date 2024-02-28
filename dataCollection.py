@@ -252,8 +252,8 @@ def userListTable(gameMode="ARAM"):
 #saveUserInfo("KlahrStar", "NA1")
 
 #Update all match data for users in user list
-#updateAllGameInfo(20)
+#updateAllGameInfo(40)
 
 #Final Tables
-#print(championTable("KlahrStar"))
-print(userListTable())
+print(championTable("shuckle"))
+#print(userListTable())
