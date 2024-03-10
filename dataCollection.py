@@ -25,7 +25,7 @@ def saveUserInfo(username, tag):
         userDf = userDf.to_csv("userList.csv", index=False)
         print("user Updated: " + info[0] + " - " + info[2])
     else:
-        #Otherwise adds the user and their info to the list.
+        #Otherwise adds the user to the userList. 
         userDf.loc[len(userDf)] = info
         userDf = userDf.to_csv("userList.csv", index=False)
         print("User Added: " + str(info[0]) + " - " + info[2])
@@ -54,20 +54,21 @@ def updateUserGameIds(matchCount):
     return
 
 def getGameInfo(matchId, puuid):
+    #Gets relevant game information (champs, items, scores, ect.) and formats it for later use.
     response = requests.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + matchId + "/?api_key=" + key).json()
     personalInfo = []
     info = []
     
-    #general game info
+    #General game info
     info.append(matchId)
     info.append(response["info"]["gameDuration"]) 
     info.append(response["info"]["gameMode"]) 
     info.append(response["info"]["gameStartTimestamp"]) 
     
-    #Loops 10 times to get the individual stats of each player and appends them to the list
+    #Loops 10 times to get the individual stats of each player and appends them to the list.
     for x in range(10):
         if response["info"]["participants"][x]["puuid"] == puuid:
-            #Stores personal stats
+            #Stores personal data into a duplicate variable for easier access. 
             personalInfo.append(response["info"]["participants"][x]["win"])
             personalInfo.append(response["info"]["participants"][x]["championName"])
             personalInfo.append(response["info"]["participants"][x]["championId"])
@@ -106,6 +107,7 @@ def getGameInfo(matchId, puuid):
     return personalInfo + info
 
 def updateGameInfo(username, puuid):
+    #Formats info from multiple outputs from getGameInfo() into useable dataframes. 
     matchList = pd.read_csv("matchList/" + username + "_matchList.csv", index_col=None)["matchId"]  
     columns = ["userWin", "userChamp", "userChampId", "userKills", "userDeaths", "userAssists",
             "matchId", "gameDurration", "gameMode", "gameStartTimestamp",
@@ -195,6 +197,7 @@ def updateGameInfo(username, puuid):
         return
 
 def updateAllGameInfo(gameCount):
+    #Updates all user files, the "master function".
     userDf = pd.read_csv("userList.csv", index_col=None)
     updateUserGameIds(gameCount)
     for x in range(len(userDf.index)):
@@ -255,5 +258,7 @@ def userListTable(gameMode="ARAM"):
 #updateAllGameInfo(40)
 
 #Final Tables
-print(championTable("shuckle"))
+#print(championTable("shuckle"))
+#print(championTable("actuallyapotato"))
 #print(userListTable())
+
