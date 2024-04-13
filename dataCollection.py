@@ -6,7 +6,6 @@ import os
 # LoL API Dev Portal: https://developer.riotgames.com/
 # Dev Docs: https://developer.riotgames.com/docs/lol
 
-
 key = "RGAPI-c5641ff5-8199-4fd1-b6d5-59427a1460bf"
 
 def getUserInfo(username, tag):
@@ -255,7 +254,7 @@ def userListTable(gameMode="ARAM"):
 #saveUserInfo("KlahrStar", "NA1")
 
 #Update all match data for users in user list
-#updateAllGameInfo(40)
+updateAllGameInfo(40)
 
 #Final Tables
 #print(championTable("shuckle"))
