@@ -251,13 +251,20 @@ def userListTable(gameMode="ARAM"):
     return userTable
 
 #Add user to user list
-#saveUserInfo("KlahrStar", "NA1")
+#saveUserInfo("Balkai", "NA1")
 
 #Update all match data for users in user list
-updateAllGameInfo(40)
+#updateAllGameInfo(90)
 
 #Final Tables
-#print(championTable("shuckle"))
+#print(championTable("katinka4"))
 #print(championTable("actuallyapotato"))
 #print(userListTable())
+
+
+for user in ["shuckle", "katinka4", "actuallyapotato", "jackpot", "balkai"]:
+    print(user)
+    print(championTable(user).head(10))
+    print("-----------------------------------------------")
+
 
