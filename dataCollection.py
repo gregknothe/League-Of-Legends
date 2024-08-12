@@ -64,44 +64,76 @@ def getGameInfo(matchId, puuid):
     info.append(response["info"]["gameMode"]) 
     info.append(response["info"]["gameStartTimestamp"]) 
     
+    print(response["info"]["gameMode"])
+
     #Loops 10 times to get the individual stats of each player and appends them to the list.
     for x in range(10):
-        if response["info"]["participants"][x]["puuid"] == puuid:
-            #Stores personal data into a duplicate variable for easier access. 
-            personalInfo.append(response["info"]["participants"][x]["win"])
-            personalInfo.append(response["info"]["participants"][x]["championName"])
-            personalInfo.append(response["info"]["participants"][x]["championId"])
-            personalInfo.append(response["info"]["participants"][x]["kills"])
-            personalInfo.append(response["info"]["participants"][x]["deaths"])
-            personalInfo.append(response["info"]["participants"][x]["assists"])
+        #print(response["info"]["participants"][x]["summonerName"])
+        try:
+            if response["info"]["participants"][x]["puuid"] == puuid:
+                #Stores personal data into a duplicate variable for easier access. 
+                personalInfo.append(response["info"]["participants"][x]["win"])
+                personalInfo.append(response["info"]["participants"][x]["championName"])
+                personalInfo.append(response["info"]["participants"][x]["championId"])
+                personalInfo.append(response["info"]["participants"][x]["kills"])
+                personalInfo.append(response["info"]["participants"][x]["deaths"])
+                personalInfo.append(response["info"]["participants"][x]["assists"])
 
-        info.append(response["info"]["participants"][x]["summonerName"])
-        info.append(response["info"]["participants"][x]["puuid"])
-        info.append(response["info"]["participants"][x]["championName"])
-        info.append(response["info"]["participants"][x]["championId"])
-        info.append(response["info"]["participants"][x]["win"])
-        
-        info.append(response["info"]["participants"][x]["kills"])
-        info.append(response["info"]["participants"][x]["deaths"])
-        info.append(response["info"]["participants"][x]["assists"])
-        info.append(response["info"]["participants"][x]["goldEarned"])
+            info.append(response["info"]["participants"][x]["summonerName"])
+            info.append(response["info"]["participants"][x]["puuid"])
+            info.append(response["info"]["participants"][x]["championName"])
+            info.append(response["info"]["participants"][x]["championId"])
+            info.append(response["info"]["participants"][x]["win"])
+            
+            info.append(response["info"]["participants"][x]["kills"])
+            info.append(response["info"]["participants"][x]["deaths"])
+            info.append(response["info"]["participants"][x]["assists"])
+            info.append(response["info"]["participants"][x]["goldEarned"])
 
-        info.append(response["info"]["participants"][x]["physicalDamageDealtToChampions"])
-        info.append(response["info"]["participants"][x]["magicDamageDealtToChampions"])
-        info.append(response["info"]["participants"][x]["trueDamageDealtToChampions"])
-        info.append(response["info"]["participants"][x]["totalDamageDealtToChampions"])
-        info.append(response["info"]["participants"][x]["physicalDamageTaken"])
-        info.append(response["info"]["participants"][x]["magicDamageTaken"])
-        info.append(response["info"]["participants"][x]["trueDamageTaken"])
-        info.append(response["info"]["participants"][x]["totalDamageTaken"])
+            info.append(response["info"]["participants"][x]["physicalDamageDealtToChampions"])
+            info.append(response["info"]["participants"][x]["magicDamageDealtToChampions"])
+            info.append(response["info"]["participants"][x]["trueDamageDealtToChampions"])
+            info.append(response["info"]["participants"][x]["totalDamageDealtToChampions"])
+            info.append(response["info"]["participants"][x]["physicalDamageTaken"])
+            info.append(response["info"]["participants"][x]["magicDamageTaken"])
+            info.append(response["info"]["participants"][x]["trueDamageTaken"])
+            info.append(response["info"]["participants"][x]["totalDamageTaken"])
 
-        info.append(response["info"]["participants"][x]["item0"])
-        info.append(response["info"]["participants"][x]["item1"])
-        info.append(response["info"]["participants"][x]["item2"])
-        info.append(response["info"]["participants"][x]["item3"])
-        info.append(response["info"]["participants"][x]["item4"])
-        info.append(response["info"]["participants"][x]["item5"])
-        info.append(response["info"]["participants"][x]["item6"])
+            info.append(response["info"]["participants"][x]["item0"])
+            info.append(response["info"]["participants"][x]["item1"])
+            info.append(response["info"]["participants"][x]["item2"])
+            info.append(response["info"]["participants"][x]["item3"])
+            info.append(response["info"]["participants"][x]["item4"])
+            info.append(response["info"]["participants"][x]["item5"])
+            info.append(response["info"]["participants"][x]["item6"])
+        except:
+            info.append("")
+            info.append("")
+            info.append("")
+            info.append(266)
+            info.append("True")
+            
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
+            info.append(0)
 
     return personalInfo + info
 
@@ -254,7 +286,7 @@ def userListTable(gameMode="ARAM"):
 #saveUserInfo("Balkai", "NA1")
 
 #Update all match data for users in user list
-#updateAllGameInfo(90)
+#updateAllGameInfo(20)
 
 #Final Tables
 #print(championTable("katinka4"))
